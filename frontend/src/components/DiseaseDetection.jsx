@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { aiAPI } from "../api/apiServices";
 
 const DiseaseDetection = () => {
   const [crop, setCrop] = useState("");
@@ -6,32 +7,6 @@ const DiseaseDetection = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const token = localStorage.getItem("token");
-  const getHeaders = () => ({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  });
-
-  const parseResponse = async (res) => {
-    const text = await res.text();
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text;
-    }
-    if (!res.ok) {
-      const message =
-        data && typeof data === "object" && data.message
-          ? data.message
-          : typeof data === "string"
-          ? data
-          : `Request failed with status ${res.status}`;
-      throw new Error(message);
-    }
-    return data;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,16 +20,11 @@ const DiseaseDetection = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/ai/disease", {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ crop, symptoms }),
-      });
-      const data = await parseResponse(res);
-      setResult(data);
+      const res = await aiAPI.diseaseDetection({ crop, symptoms });
+      setResult(res.data);
     } catch (err) {
       console.error(err);
-      setError(err.message || "Could not detect disease");
+      setError(err.response?.data?.message || "Could not detect disease");
     } finally {
       setLoading(false);
     }

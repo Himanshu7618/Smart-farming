@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { userAPI } from "../api/apiServices";
 
 function Register() {
   const [name, setName] = useState("");
@@ -8,26 +9,13 @@ function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/api/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await res.json();
-      console.log(data);
-
-      if (res.ok) {
-        alert("Registered ✅");
-        window.location.href = "/login";
-      } else {
-        alert(data.message || "Registration failed");
-      }
+      const res = await userAPI.register(name, email, password);
+      console.log(res.data);
+      alert("Registered ✅");
+      window.location.href = "/login";
     } catch (error) {
       console.error(error);
-      alert("Server not responding");
+      alert(error.response?.data?.message || "Server not responding");
     }
   };
 

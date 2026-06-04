@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { aiAPI } from "../api/apiServices";
 
 const YieldPrediction = () => {
   const [crop, setCrop] = useState("");
@@ -7,32 +8,6 @@ const YieldPrediction = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const token = localStorage.getItem("token");
-  const getHeaders = () => ({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  });
-
-  const parseResponse = async (res) => {
-    const text = await res.text();
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text;
-    }
-    if (!res.ok) {
-      const message =
-        data && typeof data === "object" && data.message
-          ? data.message
-          : typeof data === "string"
-          ? data
-          : `Request failed with status ${res.status}`;
-      throw new Error(message);
-    }
-    return data;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,16 +21,11 @@ const YieldPrediction = () => {
 
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/ai/yield", {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ crop, area, season }),
-      });
-      const data = await parseResponse(res);
-      setResult(data);
+      const res = await aiAPI.yieldPrediction({ crop, area, season });
+      setResult(res.data);
     } catch (err) {
       console.error(err);
-      setError(err.message || "Could not predict yield");
+      setError(err.response?.data?.message || "Could not predict yield");
     } finally {
       setIsLoading(false);
     }

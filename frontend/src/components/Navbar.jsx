@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { userAPI } from "../api/apiServices";
 
 const Navbar = () => {
   const [userName, setUserName] = useState("");
@@ -12,16 +13,8 @@ const Navbar = () => {
     }
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!res.ok) {
-          throw new Error("Profile fetch failed");
-        }
-        const data = await res.json();
-        setUserName(data.name || data.email || "Farmer");
+        const res = await userAPI.getProfile();
+        setUserName(res.data.name || res.data.email || "Farmer");
       } catch (error) {
         console.error(error);
         localStorage.removeItem("token");

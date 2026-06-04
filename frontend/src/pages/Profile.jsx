@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import { userAPI } from "../api/apiServices";
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -15,24 +16,11 @@ function Profile() {
           return;
         }
 
-        const res = await fetch("http://localhost:5000/api/users/profile", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          setError(errorData.message || "Unable to fetch profile");
-          return;
-        }
-
-        const data = await res.json();
-        setUser(data);
+        const res = await userAPI.getProfile();
+        setUser(res.data);
       } catch (error) {
         console.log(error);
-        setError("Error fetching profile");
+        setError(error.response?.data?.message || "Error fetching profile");
       }
     };
 

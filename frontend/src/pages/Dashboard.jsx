@@ -10,6 +10,7 @@ import FertilizerRecommendation from "../components/FertilizerRecommendation";
 import DiseaseDetection from "../components/DiseaseDetection";
 import AIFarmingAssistant from "../components/AIFarmingAssistant";
 import { useEffect, useMemo, useState } from "react";
+import { cropAPI } from "../api/apiServices";
 
 const Dashboard = () => {
   const [weather, setWeather] = useState(null);
@@ -22,45 +23,10 @@ const Dashboard = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  const token = localStorage.getItem("token");
-
-  const getHeaders = () => ({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  });
-
-  const parseResponse = async (res) => {
-    const text = await res.text();
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text;
-    }
-    if (!res.ok) {
-      const message =
-        data && typeof data === "object" && data.message
-          ? data.message
-          : typeof data === "string"
-          ? data
-          : `Request failed with status ${res.status}`;
-      throw new Error(message);
-    }
-    return data;
-  };
-
   const fetchCrops = async () => {
-    if (!token) {
-      setError("Please login to manage crops.");
-      return;
-    }
-
     try {
-      const res = await fetch("http://localhost:5000/api/crops", {
-        headers: getHeaders(),
-      });
-      const data = await parseResponse(res);
-      setCrops(data);
+      const res = await cropAPI.getAll();
+      setCrops(res.data);
       setError("");
     } catch (err) {
       console.error(err);
@@ -131,24 +97,18 @@ const Dashboard = () => {
         season,
       };
 
-      const url = editId
-        ? `http://localhost:5000/api/crops/${editId}`
-        : "http://localhost:5000/api/crops";
-      const method = editId ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: getHeaders(),
-        body: JSON.stringify(payload),
-      });
-
-      const data = await parseResponse(res);
-      setMessage(data.message || (editId ? "Crop updated" : "Crop added"));
+      if (editId) {
+        const res = await cropAPI.update(editId, payload);
+        setMessage(res.data.message || "Crop updated");
+      } else {
+        const res = await cropAPI.create(payload);
+        setMessage(res.data.message || "Crop added");
+      }
       resetForm();
       fetchCrops();
     } catch (err) {
       console.error(err);
-      setError("Could not save crop");
+      setError(err.response?.data?.message || "Could not save crop");
     }
   };
 
@@ -167,16 +127,12 @@ const Dashboard = () => {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:5000/api/crops/${id}`, {
-        method: "DELETE",
-        headers: getHeaders(),
-      });
-      const data = await parseResponse(res);
-      setMessage(data.message || "Crop deleted");
+      const res = await cropAPI.delete(id);
+      setMessage(res.data.message || "Crop deleted");
       fetchCrops();
     } catch (err) {
       console.error(err);
-      setError("Could not delete crop");
+      setError(err.response?.data?.message || "Could not delete crop");
     }
   };
 

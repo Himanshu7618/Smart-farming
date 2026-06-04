@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { userAPI } from "../api/apiServices";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -7,27 +8,15 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-    const res = await fetch("http://localhost:5000/api/users/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-    console.log("Response data:", data);
-    if (res.ok) {
-      localStorage.setItem("token", data.token);
+      const res = await userAPI.login(email, password);
+      console.log("Response data:", res.data);
+      localStorage.setItem("token", res.data.token);
       alert("Login Successful ✅");
       window.location.href = "/dashboard";
-    } else {
-      alert(data.message || "Login Failed");
+    } catch (error) {
+      console.log("ERROR:", error);
+      alert(error.response?.data?.message || "Login Failed");
     }
-  } catch (error) {
-    console.log("ERROR:",error);
-    alert("Server not responding");
-  }
   };
 
   return (

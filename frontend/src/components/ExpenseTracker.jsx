@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { expenseAPI } from "../api/apiServices";
 
 const ExpenseTracker = () => {
   const [expenses, setExpenses] = useState([]);
@@ -11,43 +12,13 @@ const ExpenseTracker = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("token");
-  const getHeaders = () => ({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  });
-
-  const parseResponse = async (res) => {
-    const text = await res.text();
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text;
-    }
-    if (!res.ok) {
-      const message =
-        data && typeof data === "object" && data.message
-          ? data.message
-          : typeof data === "string"
-          ? data
-          : `Request failed with status ${res.status}`;
-      throw new Error(message);
-    }
-    return data;
-  };
-
   const fetchExpenses = async () => {
-    if (!token) return;
     try {
-      const res = await fetch("http://localhost:5000/api/expenses", {
-        headers: getHeaders(),
-      });
-      const data = await parseResponse(res);
-      setExpenses(data);
+      const res = await expenseAPI.getAll();
+      setExpenses(res.data);
     } catch (err) {
       console.error(err);
-      setError(err.message || "Could not load expenses");
+      setError(err.response?.data?.message || "Could not load expenses");
     }
   };
 
@@ -88,22 +59,18 @@ const ExpenseTracker = () => {
     };
 
     try {
-      const url = editId
-        ? `http://localhost:5000/api/expenses/${editId}`
-        : "http://localhost:5000/api/expenses";
-      const method = editId ? "PUT" : "POST";
-      const res = await fetch(url, {
-        method,
-        headers: getHeaders(),
-        body: JSON.stringify(payload),
-      });
-      const data = await parseResponse(res);
-      setMessage(editId ? "Expense updated" : "Expense added");
+      if (editId) {
+        await expenseAPI.update(editId, payload);
+        setMessage("Expense updated");
+      } else {
+        await expenseAPI.create(payload);
+        setMessage("Expense added");
+      }
       resetForm();
       fetchExpenses();
     } catch (err) {
       console.error(err);
-      setError(err.message || "Could not save expense");
+      setError(err.response?.data?.message || "Could not save expense");
     }
   };
 
@@ -121,16 +88,12 @@ const ExpenseTracker = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this expense?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/expenses/${id}`, {
-        method: "DELETE",
-        headers: getHeaders(),
-      });
-      const data = await parseResponse(res);
+      await expenseAPI.delete(id);
       setMessage("Expense deleted");
       fetchExpenses();
     } catch (err) {
       console.error(err);
-      setError(err.message || "Could not delete expense");
+      setError(err.response?.data?.message || "Could not delete expense");
     }
   };
 
