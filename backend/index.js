@@ -25,11 +25,34 @@ if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
 const app = express();
 
 // middleware
-app.use(cors(
-{
-  origin:["http://localhost:5173", "http://localhost:5174", "https://smart-farming-three.vercel.app/"],
-  credentials: true
-}));
+const frontendUrl = process.env.FRONTEND_URL || "https://smart-farming-three.vercel.app";
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  frontendUrl,
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const isAllowedOrigin =
+      allowedOrigins.includes(origin) ||
+      /https?:\/\/.*\.vercel\.app$/.test(origin) ||
+      /https?:\/\/.*\.onrender\.com$/.test(origin);
+
+    if (isAllowedOrigin) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS origin not allowed: ${origin}`));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/crops", cropRoutes);
@@ -37,16 +60,16 @@ app.use("/api/expenses", expenseRoutes);
 app.use("/api/ai", aiRoutes);
 //MongoDB connection
 mongoose
-.connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB connected"))
-    .catch((err) => console.log("Mongo Error:", err.message));
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log("Mongo Error:", err.message));
 
 // test route
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
 
-// server start
-app.listen(5000, "0.0.0.0", () => {
-  console.log("Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });

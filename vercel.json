@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
+  "build": {
+    "env": {
+      "VITE_API_URL": "https://smart-farming-repi.onrender.com"
+    }
+  },
+  "env": {
+    "VITE_API_URL": "https://smart-farming-repi.onrender.com"
+  }
+}

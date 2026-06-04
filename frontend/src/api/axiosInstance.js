@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Centralized axios instance configuration
 // Change the BASE_URL here to switch between development and production
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://smart-farming-repi.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const axiosInstance = axios.create({
   baseURL: `${BASE_URL}/api`,
