@@ -7,6 +7,10 @@
       "config": { "distDir": "dist" }
     }
   ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
   "build": {
     "env": {
       "VITE_API_URL": "https://smart-farming-repi.onrender.com"

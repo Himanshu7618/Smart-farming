@@ -133,8 +133,9 @@ export const detectCropDisease = async (req, res) => {
 
 export const aiFarmingAssistant = async (req, res) => {
   try {
-    const { message } = req.body;
-    const normalizedMessage = String(message || "").toLowerCase();
+    const { message, question } = req.body;
+    const finalMessage = message || question;
+    const normalizedMessage = String(finalMessage || "").toLowerCase();
     const answer = assistantAnswers.find((answerText) =>
       normalizedMessage.includes("water") && answerText.includes("water")
     ) || assistantAnswers.find((answerText) => normalizedMessage.includes("soil") && answerText.includes("soil")) ||
