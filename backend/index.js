@@ -27,7 +27,7 @@ const app = express();
 // middleware
 app.use(cors(
 {
-  origin:["http://localhost:5173", "http://localhost:5174"],
+  origin:["http://localhost:5173", "http://localhost:5174", "https://smart-farming-three.vercel.app/"],
   credentials: true
 }));
 app.use(express.json());
