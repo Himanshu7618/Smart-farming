@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { userAPI } from "../api/apiServices";
 
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -12,7 +14,7 @@ function Register() {
       const res = await userAPI.register(name, email, password);
       console.log(res.data);
       alert("Registered ✅");
-      window.location.href = "/login";
+      navigate("/");
     } catch (error) {
       console.error(error);
       alert(error.response?.data?.message || "Server not responding");
