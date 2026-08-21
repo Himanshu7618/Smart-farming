@@ -137,9 +137,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50">
       <Navbar />
-      <div className="p-4 space-y-4">
+      <div className="w-full space-y-4 p-4">
         <div className="grid gap-4 md:grid-cols-3">
           <StatCard
             title="Total Crops"

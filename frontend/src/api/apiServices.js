@@ -33,18 +33,16 @@ export const cropAPI = {
 // AI API endpoints
 export const aiAPI = {
   diseaseDetection: (formData) =>
-    axiosInstance.post('/ai/disease-detection', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+    axiosInstance.post('/ai/disease', formData),
   
   yieldPrediction: (cropData) =>
-    axiosInstance.post('/ai/yield-prediction', cropData),
+    axiosInstance.post('/ai/yield', cropData),
   
   fertilizerRecommendation: (soilData) =>
-    axiosInstance.post('/ai/fertilizer-recommendation', soilData),
+    axiosInstance.post('/ai/fertilizer', soilData),
   
   farmingAssistant: (question) =>
-    axiosInstance.post('/ai/farming-assistant', { question }),
+    axiosInstance.post('/ai/assistant', { question }),
 };
 
 // Expenses API endpoints
